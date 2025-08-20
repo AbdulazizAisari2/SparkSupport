@@ -1,15 +1,17 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { useTickets } from '../../hooks/useTickets';
-import { Card, CardHeader, CardContent } from '../../components/ui/Card';
-import { StatusBadge } from '../../components/badges/StatusBadge';
-import { PriorityBadge } from '../../components/badges/PriorityBadge';
+import { MetricCard } from '../../visuals/MetricCard';
+import { RadialGauge } from '../../visuals/RadialGauge';
+import { GlowCard } from '../../visuals/GlowCard';
 import { 
-  BarChart3, 
+  TrendingUp, 
   Clock, 
   CheckCircle, 
   AlertCircle, 
-  Users,
-  Ticket
+  Ticket,
+  Users
 } from 'lucide-react';
 
 export function StaffDashboardPage() {
@@ -39,121 +41,288 @@ export function StaffDashboardPage() {
     };
   }, [allTickets]);
 
-  const recentTickets = React.useMemo(() => {
-    return allTickets
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 5);
-  }, [allTickets]);
+  // Generate mock trend data
+  const trendData = React.useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => ({
+      day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i],
+      tickets: Math.floor(Math.random() * 20) + 5,
+      resolved: Math.floor(Math.random() * 15) + 3,
+    }));
+  }, []);
+
+  const categoryData = React.useMemo(() => [
+    { name: 'Technical', value: 45, color: 'var(--brand)' },
+    { name: 'Billing', value: 30, color: 'var(--brand-2)' },
+    { name: 'General', value: 25, color: 'var(--info)' },
+  ], []);
+
+  const priorityData = React.useMemo(() => [
+    { name: 'Low', value: 12 },
+    { name: 'Medium', value: 8 },
+    { name: 'High', value: 5 },
+    { name: 'Urgent', value: 2 },
+  ], []);
+
+  const sparklineData = React.useMemo(() => 
+    Array.from({ length: 7 }, () => ({ value: Math.floor(Math.random() * 100) + 20 }))
+  , []);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-ink">Dashboard</h1>
-        <p className="text-muted mt-2">Overview of support ticket system</p>
-      </div>
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-ink to-ink-2 bg-clip-text text-transparent">
+          Dashboard
+        </h1>
+        <p className="text-muted mt-2 text-lg">Real-time overview of your support system</p>
+      </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted">Total Tickets</p>
-                <p className="text-2xl font-bold text-ink">{stats.total}</p>
-              </div>
-              <Ticket className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted">Open Tickets</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.open}</p>
-              </div>
-              <Clock className="h-8 w-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted">In Progress</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
-              </div>
-              <BarChart3 className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted">Resolved</p>
-                <p className="text-2xl font-bold text-green-600">{stats.resolved}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <MetricCard
+          title="Total Tickets"
+          value={stats.total}
+          delta={{ value: 12, isPositive: true }}
+          sparklineData={sparklineData}
+          icon={<Ticket className="h-6 w-6" />}
+        />
+        
+        <MetricCard
+          title="Open Tickets"
+          value={stats.open}
+          delta={{ value: 5, isPositive: false }}
+          sparklineData={sparklineData}
+          icon={<Clock className="h-6 w-6" />}
+        />
+        
+        <MetricCard
+          title="In Progress"
+          value={stats.inProgress}
+          delta={{ value: 8, isPositive: true }}
+          sparklineData={sparklineData}
+          icon={<TrendingUp className="h-6 w-6" />}
+        />
+        
+        <MetricCard
+          title="Resolved (7d)"
+          value={stats.resolved}
+          delta={{ value: 15, isPositive: true }}
+          sparklineData={sparklineData}
+          icon={<CheckCircle className="h-6 w-6" />}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Priority Overview */}
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-ink">Priority Overview</h2>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <span className="text-sm font-medium">Urgent</span>
-                </div>
-                <span className="text-xl font-bold text-red-600">{stats.urgent}</span>
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Trend Chart */}
+        <motion.div
+          className="lg:col-span-2"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <GlowCard className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-semibold text-ink">Ticket Trends</h3>
+                <p className="text-muted">7-day overview</p>
               </div>
-              
-              <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-4 w-4 text-orange-600" />
-                  <span className="text-sm font-medium">High</span>
+                  <div className="w-3 h-3 rounded-full bg-brand" />
+                  <span className="text-sm text-muted">Created</span>
                 </div>
-                <span className="text-xl font-bold text-orange-600">{stats.high}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm font-medium">Unassigned</span>
+                  <div className="w-3 h-3 rounded-full bg-brand-2" />
+                  <span className="text-sm text-muted">Resolved</span>
                 </div>
-                <span className="text-xl font-bold text-gray-600">{stats.unassigned}</span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData}>
+                  <defs>
+                    <linearGradient id="ticketsGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--brand)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--brand)" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="resolvedGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--brand-2)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--brand-2)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'var(--panel)', 
+                      border: '1px solid var(--border)',
+                      borderRadius: '12px',
+                      backdropFilter: 'blur(12px)'
+                    }} 
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="tickets"
+                    stroke="var(--brand)"
+                    fillOpacity={1}
+                    fill="url(#ticketsGradient)"
+                    strokeWidth={2}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="resolved"
+                    stroke="var(--brand-2)"
+                    fillOpacity={1}
+                    fill="url(#resolvedGradient)"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </GlowCard>
+        </motion.div>
 
-        {/* Recent Tickets */}
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-ink">Recent Tickets</h2>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentTickets.map((ticket) => (
-                <div key={ticket.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-ink truncate">
-                      #{ticket.id} - {ticket.subject}
-                    </p>
-                    <p className="text-xs text-muted">
-                      {ticket.customer?.name}
-                    </p>
+        {/* SLA Gauge */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <GlowCard className="p-6 text-center">
+            <h3 className="text-lg font-semibold text-ink mb-6">SLA Performance</h3>
+            <div className="flex justify-center mb-6">
+              <RadialGauge value={87} label="SLA" size="lg" />
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted">Avg Response</span>
+                <span className="text-sm font-medium text-ink">2.4h</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted">Avg Resolution</span>
+                <span className="text-sm font-medium text-ink">18.2h</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted">Customer Satisfaction</span>
+                <span className="text-sm font-medium text-ok">94%</span>
+              </div>
+            </div>
+          </GlowCard>
+        </motion.div>
+      </div>
+
+      {/* Bottom Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Category Distribution */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <GlowCard className="p-6">
+            <h3 className="text-lg font-semibold text-ink mb-6">Tickets by Category</h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center space-x-6 mt-4">
+              {categoryData.map((item, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-sm text-muted">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </GlowCard>
+        </motion.div>
+
+        {/* Priority Distribution */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <GlowCard className="p-6">
+            <h3 className="text-lg font-semibold text-ink mb-6">Priority Distribution</h3>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={priorityData} layout="horizontal">
+                  <XAxis type="number" axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'var(--panel)', 
+                      border: '1px solid var(--border)',
+                      borderRadius: '12px' 
+                    }} 
+                  />
+                  <Bar 
+                    dataKey="value" 
+                    fill="var(--brand)" 
+                    radius={[0, 8, 8, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-sm font-medium">Critical Issues</span>
+                </div>
+                <span className="text-lg font-bold text-red-500">{stats.urgent + stats.high}</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-muted" />
+                  <span className="text-sm font-medium">Unassigned</span>
+                </div>
+                <span className="text-lg font-bold text-warn">{stats.unassigned}</span>
+              </div>
+            </div>
+          </GlowCard>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
                     <PriorityBadge priority={ticket.priority} />

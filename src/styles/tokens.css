@@ -1,0 +1,113 @@
+:root {
+  /* Base colors */
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --panel-2: #f1f5f9;
+  --border: #e2e8f0;
+  --ink: #0f172a;
+  --ink-2: #334155;
+  --muted: #64748b;
+  
+  /* Brand colors */
+  --brand: #6d5efc;
+  --brand-2: #22c55e;
+  --warn: #f59e0b;
+  --info: #38bdf8;
+  --ok: #10b981;
+  --closed: #9ca3af;
+  
+  /* Interactive glow */
+  --glow: radial-gradient(600px 400px at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--brand) 28%, transparent) 0%, transparent 60%);
+  
+  /* Glass effects */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  --bg: #0a0b0f;
+  --panel: #0b0d13;
+  --panel-2: #0f1219;
+  --border: #1a1f2a;
+  --ink: #e5e7eb;
+  --ink-2: #cbd5e1;
+  --muted: #9aa0aa;
+  
+  --glass-bg: rgba(11, 13, 19, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Glass panel base styles */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Glow effect */
+.glow-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--glow);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.glow-effect:hover::before {
+  opacity: 1;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after,
+  .pulse-glow,
+  .glow-effect::before {
+    animation: none;
+    transition: none;
+  }
+}

@@ -1,12 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        bg: '#E6E6E6',
-        ink: '#29353C',
-        muted: '#768A96',
+        bg: 'var(--bg)',
+        panel: 'var(--panel)',
+        'panel-2': 'var(--panel-2)',
+        border: 'var(--border)',
+        ink: 'var(--ink)',
+        'ink-2': 'var(--ink-2)',
+        muted: 'var(--muted)',
+        brand: 'var(--brand)',
+        'brand-2': 'var(--brand-2)',
+        warn: 'var(--warn)',
+        info: 'var(--info)',
+        ok: 'var(--ok)',
+        closed: 'var(--closed)',
         primary: {
           50: '#EFF6FF',
           100: '#DBEAFE',
@@ -44,10 +55,42 @@ export default {
           900: '#7C2D12',
         },
       },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        'shimmer': 'shimmer 1.5s infinite',
+        'pulse-glow': 'pulse-glow 2s infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { opacity: '0.5' },
+          '50%': { opacity: '1' },
+        },
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
 };
